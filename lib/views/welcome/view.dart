@@ -1,9 +1,12 @@
+import 'package:artisans/common/routes/names.dart';
 import 'package:artisans/views/welcome/controller.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+import '../../common/widgets/app_button.dart';
 
 class Welcome extends GetView<WelcomeController> {
   const Welcome({Key? key}) : super(key: key);
@@ -41,7 +44,7 @@ class Welcome extends GetView<WelcomeController> {
                       'artisan',
                       style: Theme.of(context)
                           .textTheme
-                          .headlineLarge!
+                          .headlineMedium!
                           .copyWith(fontSize: 50, color: Colors.pinkAccent),
                     ),
                     Text(
@@ -239,39 +242,12 @@ class Welcome extends GetView<WelcomeController> {
                   left: 20,
                   right: 20,
                 ),
-                child: Material(
-                  type: MaterialType.transparency,
-                  borderRadius: BorderRadius.circular(15),
-                  child: InkWell(
-                    splashColor: Colors.white.withOpacity(.2),
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(15),
-                    child: Ink(
-                      height: 70,
-                      width: double.maxFinite,
-                      decoration: BoxDecoration(
-                        color: Colors.pinkAccent,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          controller.state.buttonIcon,
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            controller.state.buttonText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: AppButton(
+                  onTap: () => Get.toNamed(AppRoutes.auth),
+                  textColor: Colors.white,
+                  iconColor: Colors.white,
+                  text: controller.state.buttonText,
+                  icon: controller.state.buttonIcon,
                 ),
               ),
             ],

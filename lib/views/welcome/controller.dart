@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:artisans/views/welcome/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,21 +13,22 @@ class WelcomeController extends GetxController{
       case 1:
         state.artisanText = 'Give your skill or product a befitting visibility that can compete in the global market';
         state.buttonText = 'Start selling';
-        state.buttonIcon = const Icon(Icons.money, color: Colors.white,);
+        state.buttonIcon = Icons.money;
         break;
       case 2:
         state.artisanText = 'Choose from a pool of proposals. Interview your favorites and hire the best fit';
         state.buttonText = 'Post your project';
-        state.buttonIcon = const Icon(Icons.event_note_sharp, color: Colors.white,);
+        state.buttonIcon = Icons.event_note_sharp;
+        break;
       case 3:
         state.artisanText = 'We aim to expose the undiscovered potential of the Nigerian people to the world';
         state.buttonText = 'Join us';
-        state.buttonIcon = const Icon(Icons.join_full, color: Colors.white,);
+        state.buttonIcon = Icons.join_full;
         break;
       default:
         state.artisanText = 'Locate the best talent for your service on demand, and within your locality';
         state.buttonText =  'Start searching';
-        state.buttonIcon = const Icon(Icons.search, color: Colors.white,);
+        state.buttonIcon = Icons.search;
     }
   }
 

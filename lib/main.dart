@@ -1,3 +1,4 @@
+import 'package:artisans/common/bindings/initial_binding.dart';
 import 'package:artisans/common/routes/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -10,6 +11,7 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  InitialBinding().dependencies();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
@@ -24,7 +26,6 @@ class MyApp extends StatelessWidget {
         scheme: FlexScheme.flutterDash,
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
         blendLevel: 15,
-        scaffoldBackground: Colors.white,
         appBarStyle: FlexAppBarStyle.scaffoldBackground,
         subThemesData: const FlexSubThemesData(
           blendOnLevel: 10,
