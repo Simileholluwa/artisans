@@ -9,8 +9,9 @@ class UserData {
   final Timestamp? addTime;
   final String? phoneNumber;
   final String? country;
-  final String? fullName;
+  final String? artisanID;
   final String? nin;
+  final String? passCode;
 
   UserData({
     this.id,
@@ -21,8 +22,9 @@ class UserData {
     this.addTime,
     this.phoneNumber,
     this.country,
-    this.fullName,
+    this.artisanID,
     this.nin,
+    this.passCode,
   });
 
   factory UserData.fromFirestore(
@@ -39,8 +41,9 @@ class UserData {
       addTime: data?['addTime'],
       phoneNumber: data?['phoneNUmber'],
       country: data?['country'],
-      fullName: data?['fullName'],
+      artisanID: data?['artisanID'],
       nin: data?['nin'],
+        passCode : data?['passCode'],
     );
   }
 
@@ -54,8 +57,9 @@ class UserData {
       if (addTime != null) "addTime": addTime,
       if (phoneNumber != null) "phoneNumber" : phoneNumber,
       if (country != null) "country" : country,
-      if (fullName != null) "firstname" : fullName,
+      if (artisanID != null) "artisanID" : artisanID,
       if (nin != null) "nin": nin,
+      if (passCode != null) "passCode" : passCode,
     };
   }
 }

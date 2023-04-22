@@ -5,5 +5,6 @@ Future<bool?> toastMessage(String msg) {
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
       timeInSecForIosWeb: 1,
+      fontSize: 12,
     );
 }

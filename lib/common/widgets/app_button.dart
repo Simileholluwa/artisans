@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class AppButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -10,6 +11,7 @@ class AppButton extends StatelessWidget {
   final bool addBorder;
   final Color? textColor;
   final Color? iconColor;
+  final bool isLoading;
   const AppButton({
     Key? key,
     required this.onTap,
@@ -21,6 +23,7 @@ class AppButton extends StatelessWidget {
     this.addBorder = false,
     this.textColor,
     this.iconColor,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -40,7 +43,12 @@ class AppButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
             border: addBorder ? Border.all(color: Theme.of(context).primaryColor,) : null,
           ),
-          child: Row(
+          child: isLoading == true ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              LoadingAnimationWidget.prograssiveDots(color: Colors.white, size: 70,),
+            ],
+          ) : Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

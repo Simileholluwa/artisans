@@ -1,35 +1,37 @@
 import 'package:artisans/views/welcome/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../common/routes/names.dart';
+import '../../common/store/store.dart';
 
-class WelcomeController extends GetxController{
+class WelcomeController extends GetxController {
   WelcomeController();
 
   final state = WelcomeState();
 
-  void changePage(int index) async {
-    state.index.value = index;
-    switch(state.index.value){
-      case 1:
-        state.artisanText = 'Give your skill or product a befitting visibility that can compete in the global market';
-        state.buttonText = 'Start selling';
-        state.buttonIcon = Icons.money;
-        break;
-      case 2:
-        state.artisanText = 'Choose from a pool of proposals. Interview your favorites and hire the best fit';
-        state.buttonText = 'Post your project';
-        state.buttonIcon = Icons.event_note_sharp;
-        break;
-      case 3:
-        state.artisanText = 'We aim to expose the undiscovered potential of the Nigerian people to the world';
-        state.buttonText = 'Join us';
-        state.buttonIcon = Icons.join_full;
-        break;
-      default:
-        state.artisanText = 'Locate the best talent for your service on demand, and within your locality';
-        state.buttonText =  'Start searching';
-        state.buttonIcon = Icons.search;
-    }
+  @override
+  void onReady() {
+    super.onReady();
+    state.opacity.value = 1.0;
   }
 
+  void openAuthScreen() async {
+    await ConfigStore.to.saveAlreadyOpen();
+    Get.offAllNamed(AppRoutes.auth);
+  }
+
+  void changeIndex() async {
+    state.index.value += 1;
+    if (state.index.value == 1) {
+      state.opacity1.value = 1.0;
+    }
+    if (state.index.value == 2) {
+      state.opacity2.value = 1.0;
+    }
+    if (state.index.value == 3) {
+      state.opacity3.value = 1.0;
+      state.btnText.value = 'Join us';
+      state.icon.value = Icons.join_full;
+    }
+  }
 }

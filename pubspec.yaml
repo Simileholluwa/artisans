@@ -45,16 +45,17 @@ dependencies:
   dots_indicator: ^2.1.0
   country_picker: ^2.0.20
   cloud_firestore: ^4.5.0
-  google_sign_in: ^6.0.2
   firebase_auth: ^4.4.0
   shared_preferences: ^2.1.0
-  package_info: ^2.0.2
+  package_info_plus:
   image_picker: ^0.8.7+1
   firebase_storage: ^11.1.0
   path: ^1.8.3
   fluttertoast: ^8.2.1
   loading_animation_widget: ^1.2.0+4
   pinput: ^2.2.31
+  flutter_screen_lock: ^9.0.1
+  local_auth: ^2.1.6
 
 dev_dependencies:
   flutter_test:

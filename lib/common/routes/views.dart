@@ -1,8 +1,11 @@
-import 'package:artisans/views/authentication/auth_views/otp.dart';
+import 'package:artisans/common/widgets/setup_passcode.dart';
+import 'package:artisans/common/widgets/unlock_app.dart';
+import 'package:artisans/views/main_app/views/homepage/index.dart';
 import 'package:get/get.dart';
 import '../../views/authentication/index.dart';
-import '../../views/interests/view.dart';
+import '../../views/interests/index.dart';
 import '../../views/welcome/index.dart';
+import '../middlewares/middlewares.dart';
 import 'routes.dart';
 
 class AppPages {
@@ -14,7 +17,8 @@ class AppPages {
       name: AppRoutes.initial,
       page: () => const Welcome(),
       binding: WelcomeBinding(),
-      transition: Transition.rightToLeft,
+      transition: Transition.downToUp,
+      middlewares: [RouteWelcomeMiddleware(priority: 1)],
     ),
 
     GetPage(
@@ -25,15 +29,9 @@ class AppPages {
     ),
 
     GetPage(
-      name: AppRoutes.userDetails,
-      page: () => const UserDetails(),
-      binding: AuthBinding(),
-      transition: Transition.rightToLeft,
-    ),
-
-    GetPage(
       name: AppRoutes.interests,
       page: () => const Interests(),
+      binding: InterestsBinding(),
       transition: Transition.rightToLeft,
     ),
 
@@ -41,6 +39,37 @@ class AppPages {
       name: AppRoutes.otp,
       page: () => const OtpScreen(),
       transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoutes.emailAddress,
+      page: () => const PhoneOrEmail(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoutes.passcode,
+      page: () => const SetupPasscode(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoutes.unlock,
+      page: () => const UnlockApp(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoutes.artisanID,
+      page: () => const FullName(),
+      transition: Transition.rightToLeft,
+    ),
+
+    GetPage(
+      name: AppRoutes.mainApp,
+      page: () => const Home(),
+      transition: Transition.rightToLeft,
+      binding: HomeBinding(),
     ),
 
   ];

@@ -1,16 +1,19 @@
 import 'dart:io';
-import 'package:artisans/common/entities/user.dart';
-import 'package:artisans/common/routes/names.dart';
-import 'package:artisans/common/widgets/toast_message.dart';
+import 'package:artisans/common/entities/entities.dart';
+import 'package:artisans/common/routes/routes.dart';
+import 'package:artisans/common/store/store.dart';
+import 'package:artisans/common/widgets/widgets.dart';
 import 'package:artisans/views/authentication/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:path/path.dart';
-import '../../common/store/user.dart';
 import '../../common/utils/upload.dart';
 
 class AuthController extends GetxController {
@@ -35,155 +38,181 @@ class AuthController extends GetxController {
     state.emailController.dispose();
     state.fullNameController.dispose();
     state.ninController.dispose();
+    state.username.clear();
     super.onClose();
   }
 
   @override
-  void onReady() {
+  void onReady(){
     super.onReady();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        print("NO User");
-      } else {
-        print("There is user");
-      }
+    state.auth = FirebaseAuth.instance;
+    state.authStateChanges = state.auth.authStateChanges();
+    state.authStateChanges.listen((User? user) {
+      state.user.value = user;
     });
+    getAllUsernames();
   }
 
-  Future<void> addUserData(
-    String? email,
-    String displayName,
-    String? photoUrl,
-    String country,
-    String? phoneNumber,
-    String nin,
-  ) async {
+  Future<void> getAllUsernames() async {
     try {
-      state.isLoading.value = true;
-      FirebaseAuth auth = FirebaseAuth.instance;
-      final data = UserData(
-        id: auth.currentUser!.uid,
-        name: displayName,
-        email: email ?? auth.currentUser?.email ?? "",
-        phoneNumber: phoneNumber,
-        photoUrl: photoUrl ?? auth.currentUser?.photoURL ?? "",
-        addTime: Timestamp.now(),
-        fcmToken: "",
-        country: country,
-        nin: nin,
+      return db.collection('users').get().then((QuerySnapshot snapshots) {
+        if(snapshots.docs.isNotEmpty) {
+          snapshots.docs.forEach((doc) {
+          state.username.add(doc["artisanID"]);
+        });
+        }
+      }
       );
-
-      uploadFile(auth.currentUser!.uid);
-
-      await db
-          .collection('users')
-          .withConverter(
-            fromFirestore: UserData.fromFirestore,
-            toFirestore: (UserData userData, options) => userData.toFirestore(),
-          )
-          .add(data);
-
-      UserLoginResponseEntity userProfile = UserLoginResponseEntity();
-      userProfile.email = auth.currentUser?.email ?? "";
-      userProfile.displayName = displayName;
-      userProfile.accessToken = auth.currentUser!.uid;
-      userProfile.photoUrl = photoUrl;
-
-      UserStore.to.saveProfile(userProfile);
-      Get.offAndToNamed(AppRoutes.interests);
-      state.isLoading.value = false;
-    } catch (e) {
-      state.isLoading.value = false;
-      toastMessage('An error occurred while sending your data');
+    } catch (e){
+      if(kDebugMode) {
+        print(e.toString());
+      }
     }
   }
 
-  Future<void> verifyOtp(String otp, String verificationId) async {
+  Future<QuerySnapshot<UserData>> findAField(String field, String fieldName) async {
+    return db
+        .collection('users')
+        .withConverter(
+          fromFirestore: UserData.fromFirestore,
+          toFirestore: (UserData userData, options) => userData.toFirestore(),
+        )
+        .where(field, isEqualTo: fieldName)
+        .get();
+  }
+
+  Future<bool?> findANullField() async {
+    try {
+      return db
+          .collection('users')
+          .doc(state.user.value?.uid)
+          .get().then((DocumentSnapshot documentSnapshot) {
+            if(documentSnapshot.exists) {
+              if (documentSnapshot.get('photoUrl') == null) {
+                return true;
+              } else {
+                return false;
+              }
+            } else {
+              return false;
+            }
+      });
+    } catch (e){
+      return false;
+    }
+  }
+
+  Future<void> addPrimaryData(
+      String id, String email, String phoneNumber, String country) async {
+    final data = UserData(
+        id: id, email: email, phoneNumber: phoneNumber, country: country, photoUrl: null, artisanID: null);
+    await db
+        .collection('users')
+        .withConverter(
+          fromFirestore: UserData.fromFirestore,
+          toFirestore: (UserData userData, options) => userData.toFirestore(),
+        ).doc(id).set(data, SetOptions(merge: true));
+  }
+  
+  Future<void> addSecondaryData(String artisanID,) async {
+    try {
+      state.isLoading.value = true;
+      FirebaseAuth auth = FirebaseAuth.instance;
+      String id = auth.currentUser!.uid;
+      String photoUrl = await uploadFile(id);
+
+      final data = UserData(
+        artisanID: artisanID,
+        photoUrl: photoUrl,
+      );
+
+      await auth.currentUser!.updateDisplayName(artisanID);
+      final docRef = db
+          .collection('users')
+          .withConverter(
+        fromFirestore: UserData.fromFirestore,
+        toFirestore: (UserData userData, options) => userData.toFirestore(),
+      ).doc(id);
+      await docRef.set(data, SetOptions(merge: true));
+
+      UserLoginResponseEntity userProfile = UserLoginResponseEntity();
+      userProfile.accessToken = auth.currentUser!.uid;
+      userProfile.photoUrl = photoUrl;
+      userProfile.email = auth.currentUser!.email;
+      userProfile.displayName = artisanID;
+      
+      UserStore.to.saveProfile(userProfile);
+
+      state.isLoading.value = false;
+      toastMessage('Your profile photo has been uploaded.');
+      Get.offAllNamed(AppRoutes.passcode);
+    } catch (e) {
+      state.isLoading.value = false;
+      toastMessage('Unable to upload. Please try again.');
+      return;
+    }
+  }
+
+  Future<void> verifyOtp(
+      String otp, String verificationId, String phoneNumber) async {
     try {
       state.isLoading.value = true;
       PhoneAuthCredential credentials = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: otp,
       );
-      User? user =
-          (await FirebaseAuth.instance.signInWithCredential(credentials)).user;
+
+      User? user = (await FirebaseAuth.instance.signInWithCredential(credentials)).user;
+
+      var primaryBase = await findAField("phoneNumber", phoneNumber);
+      bool photoIsNull = await findANullField() ?? false;
 
       if (user != null) {
-        String id = user.uid;
-
-        var userBase = await db
-            .collection('users')
-            .withConverter(
-              fromFirestore: UserData.fromFirestore,
-              toFirestore: (UserData userData, options) =>
-                  userData.toFirestore(),
-            )
-            .where("id", isEqualTo: id)
-            .get();
-
-        if (userBase.docs.isEmpty) {
+        if (primaryBase.docs.isEmpty) {
           state.isLoading.value = false;
-          Get.toNamed(AppRoutes.userDetails, arguments: {"photoUrl" : "", "isPhone": true});
+          Get.toNamed(AppRoutes.emailAddress);
+        } else if (photoIsNull == true) {
+          state.isLoading.value = false;
+          Get.offAndToNamed(AppRoutes.artisanID);
         } else {
           state.isLoading.value = false;
-          Get.toNamed(AppRoutes.interests);
+          Get.offAllNamed(AppRoutes.unlock);
         }
       }
+      state.isLoading.value = false;
     } on FirebaseAuthException catch (e) {
+      state.isLoading.value = false;
       toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
+    } catch (e){
+      state.isLoading.value = false;
     }
   }
 
-  Future<void> googleSignIn() async {
+  Future<void> verifyAndLinkEmail(
+      String email, bool navigate, AuthCredential credential) async {
     try {
       state.isLoading.value = true;
-      var user = await state.googleSignIn.signIn();
-      if (user != null) {
-        final gAuth = await user.authentication;
-        final credentials = GoogleAuthProvider.credential(
-          idToken: gAuth.idToken,
-          accessToken: gAuth.accessToken,
-        );
-
-        User? currentUser =
-            (await FirebaseAuth.instance.signInWithCredential(credentials))
-                .user;
-
-        String displayName = user.displayName ?? user.email;
-        String id = currentUser!.uid;
-        String photoUrl = user.photoUrl ?? "";
-
-        state.fullNameController.text = displayName;
-
-        var userBase = await db
-            .collection('users')
-            .withConverter(
-              fromFirestore: UserData.fromFirestore,
-              toFirestore: (UserData userData, options) =>
-                  userData.toFirestore(),
-            )
-            .where("id", isEqualTo: id)
-            .get();
-
-        if (userBase.docs.isEmpty) {
-          Get.toNamed(AppRoutes.userDetails, arguments: {
-            "photoUrl": photoUrl, "isPhone": false
-          });
-          state.isLoading.value = false;
-        } else {
-          state.isLoading.value = false;
-          Get.toNamed(AppRoutes.interests);
-        }
+      FirebaseAuth auth = FirebaseAuth.instance;
+      await auth.currentUser!.linkWithCredential(credential);
+      await auth.currentUser!.updateEmail(email);
+      await addPrimaryData(auth.currentUser!.uid, auth.currentUser!.email!,
+          auth.currentUser!.phoneNumber!, state.countries.value.name);
+      await auth.currentUser!.sendEmailVerification();
+      
+      toastMessage('Email verification link sent');
+      if (navigate) {
+        Get.offAndToNamed(AppRoutes.artisanID);
       }
+      state.isLoading.value = false;
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
-      toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
-    } catch (e) {
-      state.isLoading.value = false;
-      if (kDebugMode) {
-        print(e);
+      if (e.code == "provider-already-linked") {
+        toastMessage('A user with the phone number already exist');
+      } else if (e.code == "email-already-exist") {
+        toastMessage('A user with the email already exist');
+      } else {
+        toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
       }
-      return;
     }
   }
 
@@ -193,13 +222,16 @@ class AuthController extends GetxController {
       FirebaseAuth auth = FirebaseAuth.instance;
       await auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
+        verificationCompleted:
+            (PhoneAuthCredential phoneAuthCredential) async {
           await auth.signInWithCredential(phoneAuthCredential);
-        },
+            },
         verificationFailed: (FirebaseAuthException e) {
+          state.isLoading.value = false;
           toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
         },
         codeSent: (verificationId, forceResendingToken) {
+          state.isLoading.value = false;
           Get.to(
             () => OtpScreen(
               verificationId: verificationId,
@@ -209,7 +241,6 @@ class AuthController extends GetxController {
         },
         codeAutoRetrievalTimeout: (verificationId) {},
       );
-      state.isLoading.value = false;
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
       toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
@@ -236,9 +267,10 @@ class AuthController extends GetxController {
     }
   }
 
-  Future uploadFile(String uid) async {
+  Future<String> uploadFile(String uid) async {
+    var photoUrl = '';
     if (state.photo == null) {
-      return;
+      return '';
     }
     try {
       if (state.photo != null) {
@@ -246,25 +278,126 @@ class AuthController extends GetxController {
         final destination = 'images/$uid/$fileName';
         state.task = FirebaseApi.uploadFile(destination, state.photo!);
         if (state.task == null) {
-          return;
+          return '';
         } else {
           try {
             final snapShot = await state.task!.whenComplete(() {});
             final urlDownload = await snapShot.ref.getDownloadURL();
             await FirebaseAuth.instance.currentUser!
                 .updatePhotoURL(urlDownload);
-            state.urlDownload.value = urlDownload;
-            update();
+            photoUrl = urlDownload;
           } on FirebaseException catch (e) {
-            return;
+            return '';
           } catch (e) {
-            return;
+            return '';
           }
         }
-        update();
       }
     } catch (e) {
-      return;
+      return '';
     }
+    return photoUrl;
+  }
+
+  void updateProfileImageAndName() async {
+    await Sheet.updateDetailsDialog(
+      title: "Add a profile image",
+      content: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 20.0,
+              left: 20,
+              right: 20,
+              bottom: 40,
+            ),
+            child: Center(
+              child: Text(
+                'Select an image that clearly shows your face. This makes you easily identifiable by potential customers or sellers.',
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w100,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          GetBuilder<AuthController>(
+            builder: (_) {
+              return Material(
+                type: MaterialType.transparency,
+                borderRadius: BorderRadius.circular(75),
+                child: InkWell(
+                  onTap: () {
+                    imgFromGallery();
+                  },
+                  borderRadius: BorderRadius.circular(125),
+                  child: Ink(
+                    height: 250,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(Get.context!).cardColor,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(120),
+                      child: state.photoPicked.isFalse
+                          ? Image.network(
+                              "",
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, exception, starkTrace) {
+                                return Icon(
+                                  CupertinoIcons.person_alt_circle,
+                                  size: 250,
+                                  color: Theme.of(context).hintColor,
+                                );
+                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) {
+                                  return child;
+                                }
+                                return Center(
+                                  child: LoadingAnimationWidget.prograssiveDots(
+                                    color: Colors.blue.shade800,
+                                    size: 50,
+                                  ),
+                                );
+                              },
+                            )
+                          : Image.file(
+                              state.photo!,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(
+            height: 50,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Obx(() => AppButton(
+              onTap: state.isLoading.isTrue ? (){} : () {
+                if (state.photo != null &&
+                    state.fullNameController.text.isNotEmpty) {
+                  addSecondaryData(state.fullNameController.text.trim().capitalize!);
+                } else {
+                  toastMessage('Click on the icon to pick an image');
+                }
+              },
+              icon: Icons.arrow_forward,
+              text: 'Continue',
+              textColor: Colors.white,
+              iconColor: Colors.white,
+              isLoading: state.isLoading.isFalse ? false : true,
+            ),),
+          ),
+        ],
+      ),
+    );
   }
 }

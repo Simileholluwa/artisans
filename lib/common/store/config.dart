@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../services/services.dart';
 import '../values/values.dart';
 
@@ -8,6 +8,7 @@ class ConfigStore extends GetxController {
   static ConfigStore get to => Get.find();
 
   bool isFirstOpen = false;
+  bool passcodeSet = false;
   PackageInfo? _platform;
   String get version => _platform?.version ?? '-';
   bool get isRelease => const bool.fromEnvironment("dart.vm.product");
@@ -21,6 +22,7 @@ class ConfigStore extends GetxController {
   void onInit() {
     super.onInit();
     isFirstOpen = StorageService.to.getBool(STORAGE_DEVICE_FIRST_OPEN_KEY);
+    passcodeSet = StorageService.to.getBool('passcodeSet');
   }
 
   Future<void> getPlatform() async {
@@ -29,6 +31,10 @@ class ConfigStore extends GetxController {
 
   Future<bool> saveAlreadyOpen() {
     return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, true);
+  }
+
+  Future<bool> savePasscodeSet() {
+    return StorageService.to.setBool('passcodeSet', true);
   }
 
   void onInitLocale() {

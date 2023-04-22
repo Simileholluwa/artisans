@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextField extends StatelessWidget {
   final void Function(String?)? onSaved;
@@ -49,12 +50,21 @@ class CustomTextField extends StatelessWidget {
       textInputAction: inputAction,
       onTap: onTap,
       onChanged: onChanged,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.w700,
+        fontSize: 20,
+      ),
       decoration: InputDecoration(
         filled: filled,
         labelText: labelText,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         hintText: hintText,
+        hintStyle: GoogleFonts.poppins(
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          color: Theme.of(context).hintColor
+        ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(11),
           borderSide: BorderSide(
