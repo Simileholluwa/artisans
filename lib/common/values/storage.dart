@@ -1,10 +1,8 @@
-
-const String STORAGE_USER_PROFILE_KEY = 'user_profile';
-
-const String STORAGE_USER_TOKEN_KEY = 'user_token';
-
-const String STORAGE_DEVICE_FIRST_OPEN_KEY = 'device_first_open';
-
-const String STORAGE_INDEX_NEWS_CACHE_KEY = 'cache_index_news';
-
-const String STORAGE_LANGUAGE_CODE = 'language_code';
+const String storageUserProfileKey = 'user_profile';
+const String storageUserTokenKey = 'user_token';
+const String storageDeviceFirstOpenKey = 'device_first_open';
+const String storageIndexNewsCacheKey = 'cache_index_news';
+const String storageLanguageCode = 'language_code';
+const lastKnownStateKey = 'lastKnownStateKey';
+const backgroundTimeKey = 'backgroundTimeKey';
+const lockScreenTime = 30000;

@@ -66,18 +66,20 @@ class OtpScreen extends GetView<AuthController> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Obx(
             () => AppButton(
-              onTap: controller.state.isLoading.isFalse ? () {
-                if (controller.state.otpCode.value != '' &&
-                    controller.state.otpCode.value.length == 6) {
-                  controller.verifyOtp(
-                    controller.state.otpCode.value,
-                    verificationId!,
-                    '+${controller.state.countries.value.phoneCode}${controller.state.phoneNumberController.text.trim()}',
-                  );
-                } else {
-                  toastMessage('Enter 6-Digit verification code');
-                }
-              } : (){},
+              onTap: controller.state.isLoading.isFalse
+                  ? () {
+                      if (controller.state.otpCode.value != '' &&
+                          controller.state.otpCode.value.length == 6) {
+                        controller.verifyOtp(
+                          controller.state.otpCode.value,
+                          verificationId!,
+                          '+${controller.state.countries.value.phoneCode}${controller.state.phoneNumberController.text.trim()}',
+                        );
+                      } else {
+                        toastMessage('Enter 6-Digit verification code');
+                      }
+                    }
+                  : () {},
               icon: Icons.arrow_forward,
               textColor: Colors.white,
               iconColor: Colors.white,
@@ -114,7 +116,8 @@ class OtpScreen extends GetView<AuthController> {
                     Flexible(
                       child: Text(
                         'Enter OTP code',
-                        style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.w500),
+                        style: GoogleFonts.poppins(
+                            fontSize: 25, fontWeight: FontWeight.w500),
                         textAlign: TextAlign.start,
                       ),
                     ),
@@ -126,10 +129,11 @@ class OtpScreen extends GetView<AuthController> {
                 RichText(
                   text: TextSpan(
                     style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w400, fontSize: 15, color: Theme.of(context).hintColor),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15,
+                        color: Theme.of(context).hintColor),
                     children: <TextSpan>[
-                      const TextSpan(
-                          text: 'We sent a verification code to '),
+                      const TextSpan(text: 'We sent a verification code to '),
                       TextSpan(
                         text:
                             '+${controller.state.countries.value.phoneCode}${controller.state.phoneNumberController.text}. ',
@@ -147,6 +151,7 @@ class OtpScreen extends GetView<AuthController> {
                   length: 6,
                   showCursor: true,
                   autofocus: true,
+                  controller: controller.state.pinController,
                   validator: (value) {
                     if (value!.isEmpty) {
                       return "Please enter verification code";
@@ -156,7 +161,20 @@ class OtpScreen extends GetView<AuthController> {
                       return null;
                     }
                   },
-                  androidSmsAutofillMethod: AndroidSmsAutofillMethod.smsUserConsentApi,
+                  submittedPinTheme: PinTheme(
+                    width: 60,
+                    height: 60,
+                    textStyle: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                  androidSmsAutofillMethod: AndroidSmsAutofillMethod.none,
                   defaultPinTheme: PinTheme(
                     width: 60,
                     height: 60,
@@ -187,7 +205,12 @@ class OtpScreen extends GetView<AuthController> {
                       ),
                       TextButton(
                         onPressed: () {},
-                        child: const Text('Resend code'),
+                        child: Text(
+                          'Resend code',
+                          style: GoogleFonts.poppins(
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
                       ),
                     ],
                   ),

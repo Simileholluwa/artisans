@@ -5,7 +5,6 @@ import 'package:flutter_screen_lock/flutter_screen_lock.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../routes/names.dart';
-import 'local_auth.dart';
 
 Future<void> lockScreen(String correctString) {
 
@@ -44,7 +43,6 @@ Future<void> lockScreen(String correctString) {
       toastMessage('Authentication successful');
       Get.offAllNamed(AppRoutes.mainApp);
     },
-    useBlur: false,
     footer:  Container(
       height: 70,
       width: 70,
@@ -70,9 +68,6 @@ Future<void> lockScreen(String correctString) {
       ),
       titleTextStyle: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.w500, color: Theme.of(Get.context!).iconTheme.color),
     ),
-    customizedButtonChild: Icon(Icons.fingerprint, color: Colors.blue.shade700, size: 30,),
-    customizedButtonTap: () async => await localAuth(),
-    onOpened: () async => await localAuth(),
     secretsConfig: SecretsConfig(
       spacing: 15, // or spacingRatio
       padding: const EdgeInsets.only(bottom:30, top: 60),

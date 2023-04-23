@@ -14,6 +14,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:path/path.dart';
+import 'package:pinput/pinput.dart';
 import '../../common/utils/upload.dart';
 
 class AuthController extends GetxController {
@@ -29,6 +30,7 @@ class AuthController extends GetxController {
     state.emailController = TextEditingController();
     state.fullNameController = TextEditingController();
     state.ninController = TextEditingController();
+    state.pinController = TextEditingController();
   }
 
   @override
@@ -39,11 +41,12 @@ class AuthController extends GetxController {
     state.fullNameController.dispose();
     state.ninController.dispose();
     state.username.clear();
+    state.pinController.dispose();
     super.onClose();
   }
 
   @override
-  void onReady(){
+  void onReady() {
     super.onReady();
     state.auth = FirebaseAuth.instance;
     state.authStateChanges = state.auth.authStateChanges();
@@ -56,21 +59,21 @@ class AuthController extends GetxController {
   Future<void> getAllUsernames() async {
     try {
       return db.collection('users').get().then((QuerySnapshot snapshots) {
-        if(snapshots.docs.isNotEmpty) {
+        if (snapshots.docs.isNotEmpty) {
           snapshots.docs.forEach((doc) {
-          state.username.add(doc["artisanID"]);
-        });
+            state.username.add(doc["artisanID"]);
+          });
         }
-      }
-      );
-    } catch (e){
-      if(kDebugMode) {
+      });
+    } catch (e) {
+      if (kDebugMode) {
         print(e.toString());
       }
     }
   }
 
-  Future<QuerySnapshot<UserData>> findAField(String field, String fieldName) async {
+  Future<QuerySnapshot<UserData>> findAField(
+      String field, String fieldName) async {
     return db
         .collection('users')
         .withConverter(
@@ -81,23 +84,24 @@ class AuthController extends GetxController {
         .get();
   }
 
-  Future<bool?> findANullField() async {
+  Future<bool?> findANullField(String field) async {
     try {
       return db
           .collection('users')
           .doc(state.user.value?.uid)
-          .get().then((DocumentSnapshot documentSnapshot) {
-            if(documentSnapshot.exists) {
-              if (documentSnapshot.get('photoUrl') == null) {
-                return true;
-              } else {
-                return false;
-              }
-            } else {
-              return false;
-            }
+          .get()
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists) {
+          if (documentSnapshot.get(field) == null) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
       });
-    } catch (e){
+    } catch (e) {
       return false;
     }
   }
@@ -105,16 +109,27 @@ class AuthController extends GetxController {
   Future<void> addPrimaryData(
       String id, String email, String phoneNumber, String country) async {
     final data = UserData(
-        id: id, email: email, phoneNumber: phoneNumber, country: country, photoUrl: null, artisanID: null);
+        id: id,
+        email: email,
+        phoneNumber: phoneNumber,
+        country: country,
+        photoUrl: null,
+        artisanID: null,
+        passCode: null,
+    );
     await db
         .collection('users')
         .withConverter(
           fromFirestore: UserData.fromFirestore,
           toFirestore: (UserData userData, options) => userData.toFirestore(),
-        ).doc(id).set(data, SetOptions(merge: true));
+        )
+        .doc(id)
+        .set(data, SetOptions(merge: true));
   }
-  
-  Future<void> addSecondaryData(String artisanID,) async {
+
+  Future<void> addSecondaryData(
+    String artisanID,
+  ) async {
     try {
       state.isLoading.value = true;
       FirebaseAuth auth = FirebaseAuth.instance;
@@ -130,9 +145,10 @@ class AuthController extends GetxController {
       final docRef = db
           .collection('users')
           .withConverter(
-        fromFirestore: UserData.fromFirestore,
-        toFirestore: (UserData userData, options) => userData.toFirestore(),
-      ).doc(id);
+            fromFirestore: UserData.fromFirestore,
+            toFirestore: (UserData userData, options) => userData.toFirestore(),
+          )
+          .doc(id);
       await docRef.set(data, SetOptions(merge: true));
 
       UserLoginResponseEntity userProfile = UserLoginResponseEntity();
@@ -140,7 +156,7 @@ class AuthController extends GetxController {
       userProfile.photoUrl = photoUrl;
       userProfile.email = auth.currentUser!.email;
       userProfile.displayName = artisanID;
-      
+
       UserStore.to.saveProfile(userProfile);
 
       state.isLoading.value = false;
@@ -162,10 +178,12 @@ class AuthController extends GetxController {
         smsCode: otp,
       );
 
-      User? user = (await FirebaseAuth.instance.signInWithCredential(credentials)).user;
+      User? user =
+          (await FirebaseAuth.instance.signInWithCredential(credentials)).user;
 
       var primaryBase = await findAField("phoneNumber", phoneNumber);
-      bool photoIsNull = await findANullField() ?? false;
+      bool photoIsNull = await findANullField('photoUrl') ?? false;
+      bool passCodeIsNull = await findANullField('passCode') ?? false;
 
       if (user != null) {
         if (primaryBase.docs.isEmpty) {
@@ -174,6 +192,10 @@ class AuthController extends GetxController {
         } else if (photoIsNull == true) {
           state.isLoading.value = false;
           Get.offAndToNamed(AppRoutes.artisanID);
+        } else if(passCodeIsNull == false && ConfigStore.to.passcodeSet == false){
+          state.isLoading.value = false;
+          ConfigStore.to.savePasscodeSet();
+          Get.offAllNamed(AppRoutes.unlock);
         } else {
           state.isLoading.value = false;
           Get.offAllNamed(AppRoutes.unlock);
@@ -183,7 +205,7 @@ class AuthController extends GetxController {
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
       toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
-    } catch (e){
+    } catch (e) {
       state.isLoading.value = false;
     }
   }
@@ -198,7 +220,7 @@ class AuthController extends GetxController {
       await addPrimaryData(auth.currentUser!.uid, auth.currentUser!.email!,
           auth.currentUser!.phoneNumber!, state.countries.value.name);
       await auth.currentUser!.sendEmailVerification();
-      
+
       toastMessage('Email verification link sent');
       if (navigate) {
         Get.offAndToNamed(AppRoutes.artisanID);
@@ -222,10 +244,10 @@ class AuthController extends GetxController {
       FirebaseAuth auth = FirebaseAuth.instance;
       await auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        verificationCompleted:
-            (PhoneAuthCredential phoneAuthCredential) async {
+        verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
+          state.pinController.setText(phoneAuthCredential.smsCode!);
           await auth.signInWithCredential(phoneAuthCredential);
-            },
+        },
         verificationFailed: (FirebaseAuthException e) {
           state.isLoading.value = false;
           toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
@@ -380,21 +402,26 @@ class AuthController extends GetxController {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Obx(() => AppButton(
-              onTap: state.isLoading.isTrue ? (){} : () {
-                if (state.photo != null &&
-                    state.fullNameController.text.isNotEmpty) {
-                  addSecondaryData(state.fullNameController.text.trim().capitalize!);
-                } else {
-                  toastMessage('Click on the icon to pick an image');
-                }
-              },
-              icon: Icons.arrow_forward,
-              text: 'Continue',
-              textColor: Colors.white,
-              iconColor: Colors.white,
-              isLoading: state.isLoading.isFalse ? false : true,
-            ),),
+            child: Obx(
+              () => AppButton(
+                onTap: state.isLoading.isTrue
+                    ? () {}
+                    : () {
+                        if (state.photo != null &&
+                            state.fullNameController.text.isNotEmpty) {
+                          addSecondaryData(
+                              state.fullNameController.text.trim().capitalize!);
+                        } else {
+                          toastMessage('Click on the icon to pick an image');
+                        }
+                      },
+                icon: Icons.arrow_forward,
+                text: 'Continue',
+                textColor: Colors.white,
+                iconColor: Colors.white,
+                isLoading: state.isLoading.isFalse ? false : true,
+              ),
+            ),
           ),
         ],
       ),

@@ -88,7 +88,7 @@ class SetupPasscode extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 1, bottom: 20),
-                child: Text('Using a passcode adds an extra layer of security to your account and ensures only you can access your data',
+                child: Text('Passcode adds an extra layer of security to your account and ensures only you can access your data. Please, keep the passcode safe.',
                   style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w300,
                       color: Theme.of(Get.context!).hintColor,

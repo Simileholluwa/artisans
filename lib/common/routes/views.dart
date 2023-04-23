@@ -56,7 +56,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.unlock,
       page: () => const UnlockApp(),
-      transition: Transition.rightToLeft,
+      transition: Transition.upToDown,
     ),
 
     GetPage(

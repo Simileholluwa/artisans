@@ -23,8 +23,8 @@ class UserStore extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    token = StorageService.to.getString(STORAGE_USER_TOKEN_KEY);
-    var profileOffline = StorageService.to.getString(STORAGE_USER_PROFILE_KEY);
+    token = StorageService.to.getString(storageUserTokenKey);
+    var profileOffline = StorageService.to.getString(storageUserProfileKey);
     if (profileOffline.isNotEmpty) {
       _isLogin.value = true;
       _profile(UserLoginResponseEntity.fromJson(jsonDecode(profileOffline)));
@@ -37,24 +37,24 @@ class UserStore extends GetxController {
   }
 
   Future<void> setToken(String value) async {
-    await StorageService.to.setString(STORAGE_USER_TOKEN_KEY, value);
+    await StorageService.to.setString(storageUserTokenKey, value);
     token = value;
   }
 
   Future<String> getProfile() async {
     if (token.isEmpty) return "";
-   return StorageService.to.getString(STORAGE_USER_PROFILE_KEY);
+   return StorageService.to.getString(storageUserProfileKey);
   }
 
   Future<void> saveProfile(UserLoginResponseEntity profile) async {
     _isLogin.value = true;
-    StorageService.to.setString(STORAGE_USER_PROFILE_KEY, jsonEncode(profile));
+    StorageService.to.setString(storageUserProfileKey, jsonEncode(profile));
     setToken(profile.accessToken!);
   }
 
   Future<void> onLogout() async {
-    await StorageService.to.remove(STORAGE_USER_TOKEN_KEY);
-    await StorageService.to.remove(STORAGE_USER_PROFILE_KEY);
+    await StorageService.to.remove(storageUserTokenKey);
+    await StorageService.to.remove(storageUserProfileKey);
     _isLogin.value = false;
     token = '';
     if (_user.value != null) {

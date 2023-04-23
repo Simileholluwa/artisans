@@ -11,7 +11,7 @@ class AuthState {
   final GlobalKey<FormState> formKeyUser = GlobalKey<FormState>();
   final GlobalKey<FormState> formKeyEmailOrPhone = GlobalKey<FormState>();
   final GlobalKey<FormState> formKeyFullName = GlobalKey<FormState>();
-  late TextEditingController phoneNumberController, countryController, emailController, fullNameController, ninController;
+  late TextEditingController phoneNumberController, countryController, emailController, fullNameController, ninController, pinController;
   File? photo;
   RxBool photoPicked = false.obs;
   final ImagePicker picker = ImagePicker();

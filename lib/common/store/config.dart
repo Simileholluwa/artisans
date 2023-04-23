@@ -21,7 +21,7 @@ class ConfigStore extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    isFirstOpen = StorageService.to.getBool(STORAGE_DEVICE_FIRST_OPEN_KEY);
+    isFirstOpen = StorageService.to.getBool(storageDeviceFirstOpenKey);
     passcodeSet = StorageService.to.getBool('passcodeSet');
   }
 
@@ -30,7 +30,7 @@ class ConfigStore extends GetxController {
   }
 
   Future<bool> saveAlreadyOpen() {
-    return StorageService.to.setBool(STORAGE_DEVICE_FIRST_OPEN_KEY, true);
+    return StorageService.to.setBool(storageDeviceFirstOpenKey, true);
   }
 
   Future<bool> savePasscodeSet() {
@@ -38,7 +38,7 @@ class ConfigStore extends GetxController {
   }
 
   void onInitLocale() {
-    var langCode = StorageService.to.getString(STORAGE_LANGUAGE_CODE);
+    var langCode = StorageService.to.getString(storageLanguageCode);
     if (langCode.isEmpty) return;
     var index = languages.indexWhere((element) {
       return element.languageCode == langCode;
@@ -50,6 +50,6 @@ class ConfigStore extends GetxController {
   void onLocaleUpdate(Locale value) {
     locale = value;
     Get.updateLocale(value);
-    StorageService.to.setString(STORAGE_LANGUAGE_CODE, value.languageCode);
+    StorageService.to.setString(storageLanguageCode, value.languageCode);
   }
 }

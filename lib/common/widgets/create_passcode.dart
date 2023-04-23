@@ -9,7 +9,6 @@ Future<void> createPasscode() {
   return screenLockCreate(
     context: Get.context!,
     digits: 6,
-    useBlur: false,
     title: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
