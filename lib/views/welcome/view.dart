@@ -35,7 +35,6 @@ class Welcome extends GetView<WelcomeController> {
                   ? controller.changeIndex()
                   : controller.openAuthScreen();
             },
-            textColor: Colors.white,
             iconColor: Colors.white,
             text: controller.state.btnText.value,
             icon: controller.state.icon.value,

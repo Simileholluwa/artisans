@@ -50,13 +50,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.passcode,
       page: () => const SetupPasscode(),
-      transition: Transition.rightToLeft,
+      transition: Transition.downToUp,
     ),
 
     GetPage(
       name: AppRoutes.unlock,
       page: () => const UnlockApp(),
-      transition: Transition.upToDown,
+      transition: Transition.downToUp,
     ),
 
     GetPage(
@@ -68,7 +68,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.mainApp,
       page: () => const Home(),
-      transition: Transition.rightToLeft,
+      transition: Transition.downToUp,
       binding: HomeBinding(),
     ),
 

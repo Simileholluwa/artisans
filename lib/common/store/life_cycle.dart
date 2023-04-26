@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../routes/names.dart';
 import '../services/storage.dart';
 import '../values/storage.dart';
+import 'config.dart';
 
 class LifeCycleController extends SuperController{
 
@@ -18,7 +19,7 @@ class LifeCycleController extends SuperController{
   @override
   void onInactive() {
     final prevState = StorageService.to.getInt(lastKnownStateKey);
-    final prevStateIsNotPaused = prevState != 0 && AppLifecycleState.values[prevState] != AppLifecycleState.paused;
+    final prevStateIsNotPaused = prevState != null && AppLifecycleState.values[prevState] != AppLifecycleState.paused;
     if(prevStateIsNotPaused){
       StorageService.to.setInt(backgroundTimeKey, DateTime.now().millisecondsSinceEpoch);
     }
@@ -32,11 +33,11 @@ class LifeCycleController extends SuperController{
 
   @override
   void onResumed() {
-    final bgTime = StorageService.to.getInt(backgroundTimeKey);
+    final bgTime = StorageService.to.getInt(backgroundTimeKey) ?? 0;
     final allowedBackgroundTime = bgTime + lockScreenTime;
     final shouldShowPin = DateTime.now().millisecondsSinceEpoch > allowedBackgroundTime;
     if (shouldShowPin){
-      if(UserStore.to.user.value != null) {
+      if(UserStore.to.user.value != null && ConfigStore.to.passcodeSet) {
         Get.offAllNamed(AppRoutes.unlock);
       }
     }

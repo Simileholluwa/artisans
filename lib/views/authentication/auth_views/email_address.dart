@@ -82,7 +82,6 @@ class PhoneOrEmail extends GetView<AuthController> {
                 }
               },
               icon: Icons.arrow_forward,
-              textColor: Colors.white,
               iconColor: Colors.white,
               text: 'Next',
               isLoading: controller.state.isLoading.isFalse ? false : true,

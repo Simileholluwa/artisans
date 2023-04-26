@@ -25,7 +25,7 @@ class Authentication extends GetView<AuthController> {
           bottomNavigationBar: Padding(
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10,),
             child: Obx(() => AppButton(
-              onTap: controller.state.isLoading.isFalse ? () {
+              onTap: () {
                 final isValid =
                 controller.state.formKey.currentState!.validate();
                 if (!isValid) {
@@ -35,9 +35,8 @@ class Authentication extends GetView<AuthController> {
                   controller.phoneSignIn(
                       "+${controller.state.countries.value.phoneCode}${controller.state.phoneNumberController.text},");
                 }
-              } : (){},
+              },
               icon: Icons.arrow_forward,
-              textColor: Colors.white,
               iconColor: Colors.white,
               text: 'Next',
               isLoading: controller.state.isLoading.isFalse ? false : true,

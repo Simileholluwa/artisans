@@ -108,7 +108,7 @@ Future<void> createPasscode() {
       ),
     ),
     canCancel: true,
-    cancelButton: Container(),
-    deleteButton: Icon(Icons.arrow_back_ios_sharp, color: Colors.blue.shade700, size: 24,),
+    cancelButton: const Icon(Icons.close, size: 30,),
+    deleteButton: const Icon(Icons.arrow_back_ios_sharp, size: 24,),
   );
 }

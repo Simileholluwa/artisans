@@ -1,4 +1,4 @@
-import 'package:artisans/common/widgets/widgets.dart';
+import 'package:artisans/common/utils/send_email.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screen_lock/flutter_screen_lock.dart';
@@ -40,25 +40,13 @@ Future<void> lockScreen(String correctString) {
       ),
     ),
     onUnlocked: () {
-      toastMessage('Authentication successful');
       Get.offAllNamed(AppRoutes.mainApp);
     },
-    footer:  Container(
-      height: 70,
-      width: 70,
-      decoration: BoxDecoration(
-        color: Theme.of(Get.context!).canvasColor,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: IconButton(
-          onPressed: (){},
-          tooltip: 'Need help?',
-          icon: Icon(CupertinoIcons.chat_bubble_text, size: 35, color: Theme.of(Get.context!).iconTheme.color,),
-        ),
-      ),
-    ),
     canCancel: true,
+    customizedButtonChild: Icon(CupertinoIcons.chat_bubble_text, size: 35, color: Theme.of(Get.context!).iconTheme.color,),
+    customizedButtonTap: () async {
+      openEmail();
+    },
     config: ScreenLockConfig(
       backgroundColor: Theme.of(Get.context!).scaffoldBackgroundColor,
       textStyle: GoogleFonts.poppins(
@@ -107,8 +95,8 @@ Future<void> lockScreen(String correctString) {
         ),
       ),
     ),
-    cancelButton: Container(),
-    deleteButton: Icon(Icons.arrow_back_ios_sharp, color: Colors.blue.shade700, size: 24,),
+    cancelButton: const Icon(Icons.close, size: 30,),
+    deleteButton: const Icon(Icons.arrow_back_ios_sharp, size: 24,),
     correctString: correctString,
   );
 }

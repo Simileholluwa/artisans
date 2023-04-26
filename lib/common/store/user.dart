@@ -54,6 +54,7 @@ class UserStore extends GetxController {
 
   Future<void> onLogout() async {
     await StorageService.to.remove(storageUserTokenKey);
+    await StorageService.to.remove('userPasscode');
     await StorageService.to.remove(storageUserProfileKey);
     _isLogin.value = false;
     token = '';

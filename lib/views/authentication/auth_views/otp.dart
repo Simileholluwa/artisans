@@ -66,8 +66,7 @@ class OtpScreen extends GetView<AuthController> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Obx(
             () => AppButton(
-              onTap: controller.state.isLoading.isFalse
-                  ? () {
+              onTap: () {
                       if (controller.state.otpCode.value != '' &&
                           controller.state.otpCode.value.length == 6) {
                         controller.verifyOtp(
@@ -76,12 +75,10 @@ class OtpScreen extends GetView<AuthController> {
                           '+${controller.state.countries.value.phoneCode}${controller.state.phoneNumberController.text.trim()}',
                         );
                       } else {
-                        toastMessage('Enter 6-Digit verification code');
+                        message('Please enter the 6-Digit verification code sent to your phone number.', isError: false, isInfo: true,);
                       }
-                    }
-                  : () {},
+                    },
               icon: Icons.arrow_forward,
-              textColor: Colors.white,
               iconColor: Colors.white,
               text: 'Next',
               isLoading: controller.state.isLoading.isFalse ? false : true,

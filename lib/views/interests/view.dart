@@ -24,10 +24,9 @@ class Interests extends GetView<InterestsController> {
           padding: const EdgeInsets.only(left: 20, bottom: 10, right: 20,),
           child: AppButton(
             onTap: () {
-              controller.state.selectedInterests.length < 3 ? toastMessage('Select up to three interests') : controller.goToHome();
+              controller.state.selectedInterests.length < 3 ? message('Select up to three interests') : controller.goToHome();
             },
             icon: FontAwesomeIcons.check,
-            textColor: Colors.white,
             iconColor: Colors.white,
             text: 'Finish',
           ),

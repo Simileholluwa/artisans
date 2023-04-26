@@ -7,9 +7,7 @@ class AppButton extends StatelessWidget {
   final double? height;
   final IconData icon;
   final String text;
-  final Color? buttonColor;
   final bool addBorder;
-  final Color? textColor;
   final Color? iconColor;
   final bool isLoading;
   const AppButton({
@@ -19,9 +17,7 @@ class AppButton extends StatelessWidget {
     this.height = 70,
     required this.icon,
     required this.text,
-    this.buttonColor = Colors.pinkAccent,
     this.addBorder = false,
-    this.textColor,
     this.iconColor,
     this.isLoading = false,
   }) : super(key: key);
@@ -33,20 +29,20 @@ class AppButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(15),
       child: InkWell(
         splashColor: Colors.white.withOpacity(.2),
-        onTap: onTap,
+        onTap: isLoading == false ? onTap : (){},
         borderRadius: BorderRadius.circular(15),
         child: Ink(
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: buttonColor,
+            color: isLoading == false ? Colors.pinkAccent : Theme.of(context).canvasColor,
             borderRadius: BorderRadius.circular(15),
             border: addBorder ? Border.all(color: Theme.of(context).primaryColor,) : null,
           ),
           child: isLoading == true ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              LoadingAnimationWidget.prograssiveDots(color: Colors.white, size: 70,),
+              LoadingAnimationWidget.prograssiveDots(color: Colors.pinkAccent, size: 70,),
             ],
           ) : Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -64,7 +60,7 @@ class AppButton extends StatelessWidget {
                 style: Theme.of(context)
                     .textTheme
                     .bodyLarge!
-                    .copyWith(color: textColor),
+                    .copyWith(color: Colors.white),
               ),
             ],
           ),

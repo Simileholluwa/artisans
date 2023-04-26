@@ -1,4 +1,5 @@
 import 'package:artisans/common/routes/routes.dart';
+import 'package:artisans/common/services/services.dart';
 import 'package:artisans/common/store/store.dart';
 import 'package:artisans/common/utils/retrieve_passcode.dart';
 import 'package:artisans/common/widgets/widgets.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_button.dart';
 
 class UnlockApp extends StatelessWidget {
   const UnlockApp({Key? key}) : super(key: key);
@@ -89,8 +89,8 @@ class UnlockApp extends StatelessWidget {
                     children: <TextSpan>[
                       const TextSpan(text: 'Welcome back, '),
                       TextSpan(
-                        text:
-                            FirebaseAuth.instance.currentUser?.displayName ?? '',
+                        text: FirebaseAuth.instance.currentUser?.displayName ??
+                            '',
                         style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w700,
                             color: Theme.of(Get.context!).iconTheme.color),
@@ -98,26 +98,34 @@ class UnlockApp extends StatelessWidget {
                     ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Not ${FirebaseAuth.instance.currentUser?.displayName ?? ''}?',
+                TextButton(
+                  onPressed: () {
+                    UserStore.to.onLogout();
+                    Get.offAllNamed(AppRoutes.auth);
+                  },
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    text: TextSpan(
                       style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w200,
-                          color: Theme.of(context).hintColor),
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(Get.context!).hintColor,
+                      ),
+                      children: <TextSpan>[
+                        TextSpan(
+                          text:
+                              'Not ${FirebaseAuth.instance.currentUser?.displayName ?? ''}?',
+                        ),
+                        TextSpan(
+                          text: ' Logout',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        UserStore.to.onLogout();
-                        Get.offAllNamed(AppRoutes.auth);
-                      },
-                      child: const Text('Log Out'),
-                    ),
-                  ],
+                  ),
                 )
               ],
             ),
@@ -129,16 +137,19 @@ class UnlockApp extends StatelessWidget {
                 onTap: () async {
                   try {
                     _isLoading.value = true;
-                    String correctString = await retrievePasscode()!;
-                    _isLoading.value = false;
+                    String correctString =
+                        StorageService.to.getString('userPasscode') == ''
+                            ? await retrievePasscode()!
+                            : StorageService.to.getString('userPasscode');
                     lockScreen(correctString);
+                    _isLoading.value = false;
                   } catch (e) {
                     _isLoading.value = false;
-                    toastMessage('An error occurred');
+                    message(
+                        'Unable to retrieve passcode. Ensure you have an active internet.');
                   }
                 },
                 icon: Icons.arrow_forward,
-                textColor: Colors.white,
                 iconColor: Colors.white,
                 text: 'Unlock account',
                 isLoading: _isLoading.isFalse ? false : true,

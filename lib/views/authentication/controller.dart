@@ -159,12 +159,12 @@ class AuthController extends GetxController {
 
       UserStore.to.saveProfile(userProfile);
 
-      state.isLoading.value = false;
-      toastMessage('Your profile photo has been uploaded.');
+      message('Your profile photo has been uploaded.', isError: false);
       Get.offAllNamed(AppRoutes.passcode);
+      state.isLoading.value = false;
     } catch (e) {
       state.isLoading.value = false;
-      toastMessage('Unable to upload. Please try again.');
+      message('Unable to upload your details. Please try again.',);
       return;
     }
   }
@@ -177,6 +177,7 @@ class AuthController extends GetxController {
         verificationId: verificationId,
         smsCode: otp,
       );
+      state.pinController.setText(credentials.smsCode!);
 
       User? user =
           (await FirebaseAuth.instance.signInWithCredential(credentials)).user;
@@ -187,24 +188,24 @@ class AuthController extends GetxController {
 
       if (user != null) {
         if (primaryBase.docs.isEmpty) {
-          state.isLoading.value = false;
           Get.toNamed(AppRoutes.emailAddress);
+          state.isLoading.value = false;
         } else if (photoIsNull == true) {
-          state.isLoading.value = false;
           Get.offAndToNamed(AppRoutes.artisanID);
-        } else if(passCodeIsNull == false && ConfigStore.to.passcodeSet == false){
           state.isLoading.value = false;
+        } else if(passCodeIsNull == false && ConfigStore.to.passcodeSet == false){
           ConfigStore.to.savePasscodeSet();
           Get.offAllNamed(AppRoutes.unlock);
-        } else {
           state.isLoading.value = false;
+        } else {
           Get.offAllNamed(AppRoutes.unlock);
+          state.isLoading.value = false;
         }
       }
       state.isLoading.value = false;
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
-      toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
+      message(e.code.replaceAll('-', ' ').capitalizeFirst!);
     } catch (e) {
       state.isLoading.value = false;
     }
@@ -221,7 +222,7 @@ class AuthController extends GetxController {
           auth.currentUser!.phoneNumber!, state.countries.value.name);
       await auth.currentUser!.sendEmailVerification();
 
-      toastMessage('Email verification link sent');
+      message('Email verification link has been sent to your email.', isError: false, );
       if (navigate) {
         Get.offAndToNamed(AppRoutes.artisanID);
       }
@@ -229,11 +230,11 @@ class AuthController extends GetxController {
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
       if (e.code == "provider-already-linked") {
-        toastMessage('A user with the phone number already exist');
+        message('A user with the phone number already exist', isError: false, isInfo: true,);
       } else if (e.code == "email-already-exist") {
-        toastMessage('A user with the email already exist');
+        message('A user with the email already exist', isError: false, isInfo: true,);
       } else {
-        toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
+        message(e.code.replaceAll('-', ' ').capitalizeFirst!);
       }
     }
   }
@@ -245,27 +246,26 @@ class AuthController extends GetxController {
       await auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
-          state.pinController.setText(phoneAuthCredential.smsCode!);
           await auth.signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (FirebaseAuthException e) {
           state.isLoading.value = false;
-          toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
+          message(e.code.replaceAll('-', ' ').capitalizeFirst!);
         },
         codeSent: (verificationId, forceResendingToken) {
-          state.isLoading.value = false;
           Get.to(
             () => OtpScreen(
               verificationId: verificationId,
             ),
             transition: Transition.rightToLeft,
           );
+          state.isLoading.value = false;
         },
         codeAutoRetrievalTimeout: (verificationId) {},
       );
     } on FirebaseAuthException catch (e) {
       state.isLoading.value = false;
-      toastMessage(e.code.replaceAll('-', ' ').capitalizeFirst!);
+      message(e.code.replaceAll('-', ' ').capitalizeFirst!);
     } catch (e) {
       state.isLoading.value = false;
       return;
@@ -338,7 +338,7 @@ class AuthController extends GetxController {
                 'Select an image that clearly shows your face. This makes you easily identifiable by potential customers or sellers.',
                 style: GoogleFonts.poppins(
                   fontSize: 17,
-                  fontWeight: FontWeight.w100,
+                  fontWeight: FontWeight.w200,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -404,20 +404,17 @@ class AuthController extends GetxController {
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Obx(
               () => AppButton(
-                onTap: state.isLoading.isTrue
-                    ? () {}
-                    : () {
+                onTap: () {
                         if (state.photo != null &&
                             state.fullNameController.text.isNotEmpty) {
                           addSecondaryData(
                               state.fullNameController.text.trim().capitalize!);
                         } else {
-                          toastMessage('Click on the icon to pick an image');
+                          message('Click on the icon to pick an image', isError: false, isInfo: true,);
                         }
                       },
                 icon: Icons.arrow_forward,
                 text: 'Continue',
-                textColor: Colors.white,
                 iconColor: Colors.white,
                 isLoading: state.isLoading.isFalse ? false : true,
               ),

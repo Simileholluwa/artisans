@@ -1,3 +1,4 @@
+import 'package:artisans/common/services/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -10,6 +11,7 @@ Future<String>? retrievePasscode() {
         .doc(id)
         .get().then((DocumentSnapshot documentSnapshot) {
       if(documentSnapshot.exists) {
+        StorageService.to.setString('userPasscode', documentSnapshot.get('passCode'));
         return documentSnapshot.get('passCode');
         } else {
           return '';

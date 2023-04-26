@@ -5,4 +5,4 @@ const String storageIndexNewsCacheKey = 'cache_index_news';
 const String storageLanguageCode = 'language_code';
 const lastKnownStateKey = 'lastKnownStateKey';
 const backgroundTimeKey = 'backgroundTimeKey';
-const lockScreenTime = 30000;
+const lockScreenTime = 60000;

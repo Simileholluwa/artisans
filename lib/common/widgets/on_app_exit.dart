@@ -12,8 +12,8 @@ class OnAppExit extends StatelessWidget {
         onWillPop: () async {
           if (DateTime.now().difference(_lastExitTime) >=
               const Duration(seconds: 2)) {
-            toastMessage(
-              'Press the back button again to exit app.',
+            message(
+              'Press the back button again to exit app.', isInfo: true, isError: false, title: 'Exit application'
             );
             _lastExitTime = DateTime.now();
             return false;

@@ -33,7 +33,6 @@ class FullName extends GetView<AuthController> {
               }
             },
             icon: Icons.arrow_forward,
-            textColor: Colors.white,
             iconColor: Colors.white,
             text: 'Next',
           ),

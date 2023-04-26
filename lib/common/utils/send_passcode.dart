@@ -8,7 +8,6 @@ import '../widgets/toast_message.dart';
 
 Future<void> sendPasscode (String code) async {
   try {
-    toastMessage('Setting up passcode...');
     FirebaseAuth auth = FirebaseAuth.instance;
     String id = auth.currentUser!.uid;
     final data = UserData(
@@ -21,11 +20,11 @@ Future<void> sendPasscode (String code) async {
       toFirestore: (UserData userData, options) => userData.toFirestore(),
     ).doc(id);
     await docRef.set(data, SetOptions(merge: true));
-    toastMessage('Passcode set');
+    message('Passcode has been set for your account.', isError: false,);
     ConfigStore.to.savePasscodeSet();
     Get.offAllNamed(AppRoutes.mainApp);
   } catch (e){
-    toastMessage('Please try again');
+    message('Something went wrong. Please try again.');
     return;
   }
 }

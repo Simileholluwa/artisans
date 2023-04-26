@@ -21,13 +21,13 @@ Future<void> localAuth() async {
     }
   } on PlatformException catch(e) {
     if (e.code == auth_error.notAvailable) {
-      toastMessage('Your device does not support fingerprint biometrics');
+      message('Your device does not support fingerprint biometrics');
     } else if (e.code == auth_error.passcodeNotSet){
-      toastMessage('Set up passcode first');
+      message('Set up passcode first');
     } else if(e.code == auth_error.notEnrolled) {
-      toastMessage('Set up passcode first');
+      message('Set up passcode first');
     } else {
-      toastMessage(e.code);
+      message(e.code);
     }
   }
 }
